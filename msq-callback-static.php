@@ -1,34 +1,32 @@
 ﻿<?php /*Template Name: Static CallBack Page*/?>
 <?php
-
     $debug=false;
     $log=true;
     //init vars
     $MobilePhone=$device= $lpurl=$gclid=$utm_term=$uid=$cid=$utm_content=$title=$utm_source=$utm_medium=$utm_campaign=$label="";
+    settype ($MobilePhone, 'string' );
     $isDynamic=$isStatic=false;
     $missingData=empty($_GET);
-
     date_default_timezone_set('Asia/Jerusalem');
     ini_set("log_errors", 1);
-    $logFileName = './'.basename(__FILE__, '.php').'.log';  
+    $logFileName = './'.basename(__FILE__, '.php').'.log';
     ini_set("error_log", $logFileName);
-
 if ($debug) {
-    error_log("---------------------------- Get DATA ---------------------");   
-    error_log(print_r($_GET, true));        
-    error_log("---------------------------- End DATA ---------------------");       
+    error_log("---------------------------- Get DATA ---------------------");
+    error_log(print_r($_GET, true));
+    error_log("---------------------------- End DATA ---------------------");
 }
     
 if (!empty($_GET) ) {
     $isStatic = true;
 }
-        
+
 /**
  * Post data using curl.
- * 
+ *
  * @param string $Url        url to post to.
  * @param string $strRequest request to make.
- * 
+ *
  * @return - the reponse.
  */
 function httpsPost($Url, $strRequest)
@@ -42,20 +40,16 @@ function httpsPost($Url, $strRequest)
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $Response = curl_exec($ch);
         curl_close($ch);
-
         return $Response;
 }
-
 if ($missingData) {
-    if ($debug) { 
+    if ($debug) {
         error_log("no data");
     }
 } else if ($isStatic) {
-
     if ($debug) {
         error_log("processing - static number");
     }
-
     if (isset($_GET['utm_campaign']) ) {
         $utm_campaign =$_GET['utm_campaign'];
     }
@@ -83,19 +77,16 @@ if ($missingData) {
     if (isset($_GET['lpurl']) ) {
         $lpurl =$_GET['lpurl'];
     }
-
 }
-
 if (!$missingData) {
- 
+
     if ($debug) {
         error_log("generating response");
     }
-
     $LeadWizeUri = urlencode('http://salesonlineinternalsite:4041/Car/Public/MokdanLandingPage/?guid=Ld_From_Atomi&ia=false&utm_source='. $utm_source.'&utm_medium='. $utm_medium.'&utm_campaign='. $utm_campaign.'&utm_content='.  $utm_content.'&utm_term='. $utm_term.'&lpurl='. $lpurl.'&label='.  $label.'&gclid='. $gclid.'&uid='. $uid.'&cid='. $cid.'&device='. $device.'&title='. $title);
-    
+
     $url = 'https://leadswize.com/api/leadswize/PostCarInsuranceLead_He';
-    
+
     $LeadTypeID = '37';
     $CampaignID = '418';
     $ProviderLeadPK = '0';
@@ -108,21 +99,14 @@ if (!$missingData) {
              error_log("CLI -  not set");
         }
     }
-    if (strpos($MobilePhone, '-') !== false) {
-    } else if (substr($MobilePhone, 0, 2) == '02') {
-        $MobilePhone = substr_replace($MobilePhone, '-', 2, 0);
-    } else {
 
-        $MobilePhone = substr_replace($MobilePhone, '-', 3, 0);
-    }
-    
     $Email = '';
     $strRequest = 'LeadTypeID='.urlencode($LeadTypeID).
                   '&CampaignID='.urlencode($CampaignID).
                   '&ProviderLeadPK='.urlencode($ProviderLeadPK).
                   '&FirstName='.urlencode($FirstName).
                   '&LastName='.urlencode($LastName).
-                  '&MobilePhone='.'0'.urlencode($MobilePhone).
+                  '&MobilePhone='.urlencode($MobilePhone).
                   '&Email='.urlencode($Email).
                   '&utm_source='.urlencode($utm_source).
                   '&utm_medium='.urlencode($utm_medium).
@@ -130,25 +114,23 @@ if (!$missingData) {
                   '&utm_content='.urlencode($utm_content).
                   '&utm_campaign='.urlencode($utm_campaign).
                   '&NotesFromLeadProvider='. $LeadWizeUri;
-  
+
       $Response = httpsPost($url, $strRequest);
-      
+
     if ($log) {
         error_log('lw-response:'.$Response.'   lw-request:'.$strRequest);
     }
-          
-}
 
+}
     $google_analytics_result = file_get_contents(
         'https://www.google-analytics.com/collect?v=1&tid=UA-1458255-7&'.
         'cid={$cid}&'.
         't=event&'.
         'ec=monitor&'.
         'ea='.'car-static'. //urlencode($LeadWizeUri) .
-        '&el='. urlencode($Response) 
+        '&el='. urlencode($Response)
     );
 
- 
 ?>
 <head>
 </head><body><BR>
